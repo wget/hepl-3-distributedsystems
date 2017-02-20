@@ -1,0 +1,12 @@
+/DataObjects/build/
+/DatabaseConnectionTest/build/
+/Sell-interfaces/build/
+/Buyer/build/
+/Sell-interfaces/dist/
+/DatabaseConnection/build/
+/Buyer/dist/
+/Sell/build/
+/DatabaseConnection/dist/
+/Sell/dist/
+/Sell/Sell-ejb/build/
+/Sell/Sell-ejb/dist/
