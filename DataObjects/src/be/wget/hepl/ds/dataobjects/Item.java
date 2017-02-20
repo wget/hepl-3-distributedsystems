@@ -5,13 +5,15 @@
  */
 package be.wget.hepl.ds.dataobjects;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author William Gathoye <wget>
  */
-public class Item {
+
+public class Item implements Serializable {
     private int id;
     private String description;
     private float announcedPrice;

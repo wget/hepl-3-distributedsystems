@@ -5,9 +5,10 @@
         <data xmlns="http://www.netbeans.org/ns/j2ee-ejbjarproject/3">
             <name>Sell-ejb</name>
             <minimum-ant-version>1.6.5</minimum-ant-version>
-            <included-library dirs="200">reference.Sell-interfaces.jar</included-library>
             <included-library dirs="200">reference.DataObjects.jar</included-library>
             <included-library dirs="200">reference.DatabaseConnection.jar</included-library>
+            <included-library dirs="200">reference.Sell-interfaces.jar</included-library>
+            <included-library dirs="200">file.reference.mariadb-java-client-1.5.8.jar</included-library>
             <source-roots>
                 <root id="src.dir" name="Source Packages"/>
             </source-roots>

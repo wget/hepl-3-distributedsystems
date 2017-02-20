@@ -813,25 +813,29 @@ exists or setup the property manually. For example like this:
     </target>
     <target depends="compile,-library-inclusion-in-archive-weblogic,-library-inclusion-in-archive-by-user" name="library-inclusion-in-archive"/>
     <target if="is.jars.in.ejbjar" name="-library-inclusion-in-archive-by-user">
-        <copyfiles files="${reference.Sell-interfaces.jar}" todir="${build.classes.dir}"/>
         <copyfiles files="${reference.DataObjects.jar}" todir="${build.classes.dir}"/>
         <copyfiles files="${reference.DatabaseConnection.jar}" todir="${build.classes.dir}"/>
+        <copyfiles files="${reference.Sell-interfaces.jar}" todir="${build.classes.dir}"/>
+        <copyfiles files="${file.reference.mariadb-java-client-1.5.8.jar}" todir="${build.classes.dir}"/>
     </target>
     <target if="is.server.weblogic" name="-library-inclusion-in-archive-weblogic">
-        <basename file="${reference.Sell-interfaces.jar}" property="manifest.reference.Sell-interfaces.jar"/>
         <basename file="${reference.DataObjects.jar}" property="manifest.reference.DataObjects.jar"/>
         <basename file="${reference.DatabaseConnection.jar}" property="manifest.reference.DatabaseConnection.jar"/>
+        <basename file="${reference.Sell-interfaces.jar}" property="manifest.reference.Sell-interfaces.jar"/>
+        <basename file="${file.reference.mariadb-java-client-1.5.8.jar}" property="manifest.file.reference.mariadb-java-client-1.5.8.jar"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Extension-List" value="jar-1 jar-2 jar-3 "/>
-            <attribute name="jar-1-Extension-Name" value="${manifest.reference.Sell-interfaces.jar}"/>
-            <attribute name="jar-2-Extension-Name" value="${manifest.reference.DataObjects.jar}"/>
-            <attribute name="jar-3-Extension-Name" value="${manifest.reference.DatabaseConnection.jar}"/>
+            <attribute name="Extension-List" value="jar-1 jar-2 jar-3 jar-4 "/>
+            <attribute name="jar-1-Extension-Name" value="${manifest.reference.DataObjects.jar}"/>
+            <attribute name="jar-2-Extension-Name" value="${manifest.reference.DatabaseConnection.jar}"/>
+            <attribute name="jar-3-Extension-Name" value="${manifest.reference.Sell-interfaces.jar}"/>
+            <attribute name="jar-4-Extension-Name" value="${manifest.file.reference.mariadb-java-client-1.5.8.jar}"/>
         </manifest>
     </target>
     <target depends="compile" name="library-inclusion-in-manifest">
-        <copyfiles files="${reference.Sell-interfaces.jar}" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.DataObjects.jar}" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${reference.DatabaseConnection.jar}" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${reference.Sell-interfaces.jar}" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.mariadb-java-client-1.5.8.jar}" todir="${dist.ear.dir}/lib"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update"/>
     </target>
     <target name="-copy-meta-inf">
