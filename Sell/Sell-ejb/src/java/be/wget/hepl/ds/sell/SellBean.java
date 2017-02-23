@@ -7,17 +7,21 @@ package be.wget.hepl.ds.sell;
 
 import be.wget.hepl.ds.databaseconnection.DatabaseConnection;
 import be.wget.hepl.ds.dataobjects.Item;
+import be.wget.hepl.ds.dataobjects.Log;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
+import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
@@ -35,6 +39,9 @@ public class SellBean implements SellBeanRemote {
 
     @Resource(mappedName = "jms/SellTopic")
     private Topic sellTopic;
+    
+    @Resource
+    private SessionContext context;
     
     private Connection db;
 
@@ -73,14 +80,16 @@ public class SellBean implements SellBeanRemote {
             Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        log(context.getCallerPrincipal().getName() +
+            " asked the list of available items");
+        
         return itemsList;
     }
 
     @Override
     public void makeABid(int batchId, float amount) {
+        javax.jms.Connection connection = null;
         try {
-            
-            javax.jms.Connection connection;
             connection = connectionFactory.createConnection();
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -88,16 +97,61 @@ public class SellBean implements SellBeanRemote {
             connection.start();
             
             TextMessage message = session.createTextMessage();
-            message.setStringProperty("destination", "bidMDB");
+            message.setStringProperty("destination", "mdbbid");
             message.setIntProperty("batchId", batchId);
             message.setFloatProperty("amount", amount);
             
             producer.send(message);
             
-            connection.close();
+            log(context.getCallerPrincipal().getName() +
+                " made a bit of " + amount +
+                " for the batch " + batchId);
         
         } catch (JMSException ex) {
             Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException ex) {
+                    Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    
+    private void log(String message) {
+        javax.jms.Connection connection = null;
+        try {
+           
+            connection = connectionFactory.createConnection();
+
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            MessageProducer producer = session.createProducer(sellTopic);
+            connection.start();
+            
+            ObjectMessage objectMessage = session.createObjectMessage();
+            objectMessage.setStringProperty("destination", "mdblog");
+            
+            Log log = new Log();
+            log.setTimestamp(new Timestamp((new java.util.Date()).getTime()));
+            log.setInfo(message);
+            
+            objectMessage.setObject(log);
+            producer.send(objectMessage);
+            
+            connection.close();
+                
+        } catch (JMSException ex) {
+            Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (JMSException ex) {
+                    Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 

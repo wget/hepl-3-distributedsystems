@@ -37,7 +37,7 @@ public class Main {
             connection = connectionFactory.createConnection();
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-            MessageConsumer consumer = session.createConsumer(sellTopic, "destination LIKE 'bidMDB'");
+            MessageConsumer consumer = session.createConsumer(sellTopic, "destination LIKE 'mdbbid'");
             connection.start();
             
             
