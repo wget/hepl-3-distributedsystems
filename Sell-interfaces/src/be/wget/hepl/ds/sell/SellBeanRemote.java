@@ -17,6 +17,6 @@ import javax.ejb.Remote;
 public interface SellBeanRemote {
 
     ArrayList<Item> getAvailableItems();
-    void madeABid(int batchId, float amount);
+    void makeABid(int batchId, float amount);
     
 }

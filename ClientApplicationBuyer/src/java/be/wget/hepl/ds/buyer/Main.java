@@ -30,6 +30,9 @@ public class Main {
         for (int i = 0; i < itemsList.size(); i++) {
             System.out.println(((Item)itemsList.get(0)).getDescription());
         }
+        
+        
+        SellBean.makeABid(1000, 250.65f);
 
     }
     

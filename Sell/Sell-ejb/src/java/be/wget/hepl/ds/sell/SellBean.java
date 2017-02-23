@@ -16,10 +16,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.jms.JMSConnectionFactory;
-import javax.jms.JMSContext;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.jms.Topic;
+import javax.jms.TopicConnectionFactory;
 
 /**
  *
@@ -28,12 +30,11 @@ import javax.jms.Topic;
 @Stateless
 public class SellBean implements SellBeanRemote {
 
-    @Resource(mappedName = "jms/myTestTopic")
-    private Topic myTestTopic;
+    @Resource(mappedName = "jms/SellTopicFactory")
+    private TopicConnectionFactory connectionFactory;
 
-    @Inject
-    @JMSConnectionFactory("jms/myTestTopicFactory")
-    private JMSContext context;
+    @Resource(mappedName = "jms/SellTopic")
+    private Topic sellTopic;
     
     private Connection db;
 
@@ -75,15 +76,29 @@ public class SellBean implements SellBeanRemote {
         return itemsList;
     }
 
-    // Add business logic below. (Right-click in editor and choose
-    // "Insert Code > Add Business Method")
-
     @Override
-    public void madeABid(int batchId, float amount) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void makeABid(int batchId, float amount) {
+        try {
+            
+            javax.jms.Connection connection;
+            connection = connectionFactory.createConnection();
+
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            MessageProducer producer = session.createProducer(sellTopic);
+            connection.start();
+            
+            TextMessage message = session.createTextMessage();
+            message.setStringProperty("destination", "bidMDB");
+            message.setIntProperty("batchId", batchId);
+            message.setFloatProperty("amount", amount);
+            
+            producer.send(message);
+            
+            connection.close();
+        
+        } catch (JMSException ex) {
+            Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
-    private void sendJMSMessageToMyTestTopic(String messageData) {
-        context.createProducer().send(myTestTopic, messageData);
-    }
 }

@@ -12,3 +12,8 @@
 /Sell/Sell-ejb/dist/
 /DataObjects/dist/
 /ClientApplicationBuyer/nbproject/private/
+/SellTopicJMSTest/nbproject/private/
+/SellTopicJMSTest/build/
+/SellTopicJMSTest/dist/
+/ClientApplicationBuyer/build/
+/ClientApplicationBuyer/dist/
