@@ -14,7 +14,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.jms.JMSConnectionFactory;
+import javax.jms.JMSContext;
+import javax.jms.Topic;
 
 /**
  *
@@ -22,6 +27,13 @@ import javax.ejb.Stateless;
  */
 @Stateless
 public class SellBean implements SellBeanRemote {
+
+    @Resource(mappedName = "jms/myTestTopic")
+    private Topic myTestTopic;
+
+    @Inject
+    @JMSConnectionFactory("jms/myTestTopicFactory")
+    private JMSContext context;
     
     private Connection db;
 
@@ -69,5 +81,9 @@ public class SellBean implements SellBeanRemote {
     @Override
     public void madeABid(int batchId, float amount) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void sendJMSMessageToMyTestTopic(String messageData) {
+        context.createProducer().send(myTestTopic, messageData);
     }
 }
