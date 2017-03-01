@@ -6,6 +6,7 @@
 package be.wget.hepl.ds.sell;
 
 import be.wget.hepl.ds.databaseconnection.DatabaseConnection;
+import be.wget.hepl.ds.dataobjects.Bid;
 import be.wget.hepl.ds.dataobjects.Item;
 import be.wget.hepl.ds.dataobjects.Log;
 import java.sql.Connection;
@@ -23,7 +24,6 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnectionFactory;
 
@@ -87,7 +87,7 @@ public class SellBean implements SellBeanRemote {
     }
 
     @Override
-    public void makeABid(int batchId, float amount) {
+    public void makeABid(int itemId, float amount) {
         javax.jms.Connection connection = null;
         try {
             connection = connectionFactory.createConnection();
@@ -95,18 +95,22 @@ public class SellBean implements SellBeanRemote {
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             MessageProducer producer = session.createProducer(sellTopic);
             connection.start();
-            
-            TextMessage message = session.createTextMessage();
+
+            ObjectMessage message = session.createObjectMessage();
             message.setStringProperty("destination", "mdbbid");
-            message.setIntProperty("batchId", batchId);
-            message.setFloatProperty("amount", amount);
-            
+
+            Bid bid = new Bid();
+            bid.setItemId(itemId);
+            bid.setAmount(amount);
+
+            String from = context.getCallerPrincipal().getName();
+            bid.setFrom(from);
+
+            message.setObject(bid);
             producer.send(message);
-            
-            log(context.getCallerPrincipal().getName() +
-                " made a bit of " + amount +
-                " for the batch " + batchId);
-        
+
+            log(from + " made a bid of " + amount + " for the batch " + itemId);
+
         } catch (JMSException ex) {
             Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -123,25 +127,22 @@ public class SellBean implements SellBeanRemote {
     private void log(String message) {
         javax.jms.Connection connection = null;
         try {
-           
             connection = connectionFactory.createConnection();
 
             Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             MessageProducer producer = session.createProducer(sellTopic);
             connection.start();
-            
+
             ObjectMessage objectMessage = session.createObjectMessage();
             objectMessage.setStringProperty("destination", "mdblog");
-            
+
             Log log = new Log();
             log.setTimestamp(new Timestamp((new java.util.Date()).getTime()));
             log.setInfo(message);
-            
+
             objectMessage.setObject(log);
             producer.send(objectMessage);
-            
-            connection.close();
-                
+
         } catch (JMSException ex) {
             Logger.getLogger(SellBean.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
